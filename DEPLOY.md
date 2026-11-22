@@ -189,74 +189,85 @@ git checkout <commit>
 dc up -d --build web
 ```
 
-> Com imagens versionadas em um registry (seção 5), basta trocar a tag em `IMAGE` e rodar `dc up -d`.
+> Com o deploy automático (seção 5), use o rollback pelo GitHub Actions.
 
 > ⚠️ Não apague o volume `caddy_data` (`docker compose down -v`): ele guarda os certificados.
 > Emitir muitos certificados seguidos pode esbarrar no limite do Let's Encrypt.
 
 ---
 
-## 5. (Opcional) Imagem pronta via GitHub Container Registry
+## 5. Deploy automático com GitHub Actions (Hostinger VPS)
 
-Em vez de compilar no servidor, a imagem pode ser gerada no GitHub Actions e só baixada na VPS.
-Crie `.github/workflows/docker.yml`:
+O workflow `.github/workflows/deploy.yml` faz tudo sozinho a cada `git push` na `main`:
 
-```yaml
-name: Docker
-on:
-  push:
-    branches: [main]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-
-      # Falha o pipeline se lint ou testes quebrarem
-      - name: Lint e testes
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: test
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build e push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: prod
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/portfolio:latest
-            ghcr.io/${{ github.repository_owner }}/portfolio:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+```
+push na main ──▶ test (lint + testes) ──▶ build (imagem → ghcr.io) ──▶ deploy (SSH na VPS)
 ```
 
-> O nome da imagem no GHCR precisa estar em minúsculas (ex.: `ghcr.io/jeisiqueira/portfolio`).
+No deploy, o GitHub copia `docker-compose.prod.yml` e `deploy/Caddyfile` para `~/portfolio` na VPS,
+baixa a imagem `ghcr.io/jeisiqueira/portfolio:<sha>`, recria o container `web` e espera ele ficar `healthy`.
+Se o healthcheck falhar, o job fica vermelho e mostra os logs do app.
 
-No servidor, defina a imagem no `.env.production` e use `pull` em vez de `--build`:
+### 5.1 Na VPS (uma vez só)
 
-```ini
-IMAGE=ghcr.io/jeisiqueira/portfolio:latest
-```
+Siga as seções 3.1 e 3.2 (DNS, Docker, usuário `deploy`, firewall). Na Hostinger:
+
+- No hPanel → **VPS → Firewall**, libere as portas 22, 80 e 443 (TCP) e 443 (UDP), além do `ufw`.
+- Se escolheu o template "Ubuntu 24.04 with Docker", o Docker já vem instalado.
+
+Depois, como usuário `deploy`:
 
 ```bash
-docker login ghcr.io                # só se o pacote for privado (use um Personal Access Token)
-dc pull web && dc up -d web
+mkdir -p ~/portfolio/deploy && cd ~/portfolio
+nano .env.production        # DOMAIN e SITE_URL (modelo em .env.production.example)
 ```
 
-Para rollback, troque `latest` pelo SHA de um commit anterior.
+### 5.2 Chave SSH do deploy
+
+Na **sua máquina**, gere um par de chaves exclusivo para o GitHub (sem senha):
+
+```bash
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/portfolio_deploy -N ""
+```
+
+Coloque a chave **pública** na VPS:
+
+```bash
+ssh-copy-id -i ~/.ssh/portfolio_deploy.pub deploy@IP_DO_SERVIDOR
+# ou: cole o conteúdo de portfolio_deploy.pub em /home/deploy/.ssh/authorized_keys
+```
+
+Teste: `ssh -i ~/.ssh/portfolio_deploy deploy@IP_DO_SERVIDOR "docker ps"`.
+
+Fingerprint do servidor (opcional, protege contra servidor falso). Rode **na VPS**:
+
+```bash
+ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub | awk '{print $2}'   # SHA256:xxxx
+```
+
+### 5.3 No GitHub
+
+Em **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret            | Valor                                                               |
+| ----------------- | ------------------------------------------------------------------- |
+| `VPS_HOST`        | IP da VPS (hPanel → VPS → Visão geral)                              |
+| `VPS_USER`        | `deploy`                                                            |
+| `VPS_SSH_KEY`     | conteúdo inteiro de `~/.ssh/portfolio_deploy` (a chave **privada**) |
+| `VPS_PORT`        | opcional, só se o SSH não estiver na porta 22                       |
+| `VPS_FINGERPRINT` | opcional, o `SHA256:...` do passo anterior                          |
+
+Não é preciso criar token para o registry: o workflow usa o `GITHUB_TOKEN` automático.
+
+### 5.4 Usar
+
+- **Deploy:** `git push` na `main` e acompanhe na aba **Actions**.
+- **Redeploy manual:** Actions → Deploy → **Run workflow**.
+- **Rollback:** Actions → Deploy → Run workflow, informando no campo `tag` o SHA de um commit anterior
+  (veja em Actions ou `git log`). Pula testes e build e só troca a imagem.
+
+A imagem em uso fica gravada em `IMAGE=` no `.env.production` da VPS, então reinícios do servidor
+mantêm a mesma versão.
 
 ---
 

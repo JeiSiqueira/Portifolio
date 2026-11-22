@@ -1,0 +1,166 @@
+# Deploy automático na VPS (Hostinger)
+#
+# A cada push na branch main:
+#   1. test   -> roda lint + testes (estágio "test" do Dockerfile)
+#   2. build  -> gera a imagem de produção e publica no GitHub Container Registry (ghcr.io)
+#   3. deploy -> entra na VPS por SSH, baixa a imagem nova e reinicia só o container "web"
+#
+# Também pode ser disparado manualmente (aba Actions > Deploy > Run workflow),
+# informando opcionalmente a tag (SHA de um commit) para fazer rollback.
+#
+# Secrets necessários (Settings > Secrets and variables > Actions):
+#   VPS_HOST         IP ou domínio da VPS
+#   VPS_USER         usuário SSH do deploy (ex.: deploy)
+#   VPS_SSH_KEY      chave privada SSH (conteúdo completo, sem senha)
+#   VPS_PORT         (opcional) porta SSH, padrão 22
+#   VPS_FINGERPRINT  (opcional, recomendado) fingerprint SHA256 da chave do servidor
+# Veja DEPLOY.md, seção "Deploy automático com GitHub Actions".
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag da imagem a publicar (SHA de um commit). Vazio = commit atual.'
+        required: false
+        type: string
+
+# Nunca roda dois deploys ao mesmo tempo; um novo push espera o anterior terminar
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  # Nome da imagem precisa estar em minúsculas
+  IMAGE_NAME: ghcr.io/jeisiqueira/portfolio
+  # Pasta do projeto na VPS (relativa ao home do usuário de deploy)
+  APP_DIR: portfolio
+
+jobs:
+  test:
+    name: Lint e testes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || inputs.tag == ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Lint + testes (estágio test do Dockerfile)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build:
+    name: Build e push da imagem
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build e push (estágio prod)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy na VPS
+    needs: [test, build]
+    # Roda após o build, ou sozinho quando for rollback manual com tag informada
+    if: always() && !failure() && !cancelled()
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Define a tag da imagem
+        id: vars
+        run: echo "tag=${{ inputs.tag || github.sha }}" >> "$GITHUB_OUTPUT"
+
+      # Mantém o docker-compose.prod.yml e o Caddyfile do servidor iguais aos do repositório
+      - name: Copia arquivos de deploy para a VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          source: 'docker-compose.prod.yml,deploy/Caddyfile'
+          target: ${{ env.APP_DIR }}
+
+      - name: Atualiza o container na VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE: ${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_DIR: ${{ env.APP_DIR }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          envs: IMAGE,GHCR_USER,GHCR_TOKEN,APP_DIR
+          script: |
+            set -eu
+            cd "$HOME/$APP_DIR"
+
+            if [ ! -f .env.production ]; then
+              echo "ERRO: crie $HOME/$APP_DIR/.env.production (veja .env.production.example)" >&2
+              exit 1
+            fi
+
+            # Login temporário no GHCR (o token do GitHub Actions expira ao fim do job)
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+            # Grava a imagem em uso no .env.production (para restart/reboot usarem a mesma versão)
+            if grep -q '^IMAGE=' .env.production; then
+              sed -i "s|^IMAGE=.*|IMAGE=$IMAGE|" .env.production
+            else
+              echo "IMAGE=$IMAGE" >> .env.production
+            fi
+
+            DC="docker compose -f docker-compose.prod.yml --env-file .env.production"
+            $DC pull web
+            $DC up -d --no-build --remove-orphans
+
+            docker logout ghcr.io
+
+            # Espera o healthcheck do app ficar "healthy" (até ~60s)
+            CID=$($DC ps -q web)
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo starting)
+              [ "$STATUS" = "healthy" ] && break
+              sleep 2
+            done
+            echo "Status do app: $STATUS"
+            [ "$STATUS" = "healthy" ] || { $DC logs --tail 50 web; exit 1; }
+
+            # Limpa imagens antigas (mantém as das últimas 72h para rollback rápido)
+            docker image prune -af --filter "until=72h" > /dev/null
+            echo "Deploy concluído: $IMAGE"
