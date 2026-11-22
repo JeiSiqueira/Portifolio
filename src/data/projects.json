@@ -1,0 +1,61 @@
+[
+  {
+    "slug": "controle-financeiro",
+    "title": "Controle Financeiro",
+    "year": 2025,
+    "type": "Pessoal",
+    "featured": true,
+    "summary": "Sistema para organizar receitas e despesas, unindo minha experiência na área financeira à programação.",
+    "problem": "Controlar o dinheiro em planilhas soltas é trabalhoso e sujeito a erros, e fica difícil enxergar para onde os gastos estão indo.",
+    "role": "Projeto pessoal desenvolvido do início ao fim: levantamento das necessidades, modelagem dos dados, interface e regras de negócio.",
+    "solution": [
+      "Cadastro de receitas e despesas por categoria",
+      "Resumo do saldo do período",
+      "Visualização dos gastos por categoria"
+    ],
+    "challenges": "A completar: um desafio técnico e como ele foi resolvido.",
+    "result": "A completar: o que o projeto entrega hoje.",
+    "tags": ["C#", ".NET 10", "ASP.NET Core", "React", "TypeScript", "MySQL", "Entity Framework Core", "JWT", "ClosedXML"],
+    "cover": "",
+    "gallery": [],
+    "links": { "demo": "", "repo": "" }
+  },
+  {
+    "slug": "agendamento-salao",
+    "title": "Agendamento de Salão de Beleza",
+    "year": 2025,
+    "type": "Pessoal",
+    "featured": true,
+    "summary": "Sistema de agendamento pensado para facilitar a rotina de quem atende clientes.",
+    "problem": "Agendar por mensagem ou caderno gera conflitos de horário, esquecimentos e retrabalho para o salão e para a cliente.",
+    "role": "Projeto pessoal: definição das funcionalidades, interface e lógica de agendamento.",
+    "solution": [
+      "Escolha de serviço, data e horário",
+      "Bloqueio de horários já ocupados",
+      "Lista de agendamentos do dia"
+    ],
+    "challenges": "A completar: um desafio técnico e como ele foi resolvido.",
+    "result": "A completar: o que o projeto entrega hoje.",
+    "tags": ["C#", ".NET 8", "ASP.NET Core", "React", "TypeScript", "Vite", "MySQL", "Entity Framework Core", "BCrypt"],
+    "cover": "",
+    "gallery": [],
+    "links": { "demo": "", "repo": "" }
+  },
+  {
+    "slug": "voz-e-protecao",
+    "title": "Voz e Proteção",
+    "year": 2024,
+    "type": "Acadêmico",
+    "featured": true,
+    "summary": "Projeto acadêmico voltado aos direitos humanos, desenvolvido em equipe.",
+    "problem": "A completar: qual problema o projeto resolve e para quem.",
+    "role": "A completar: minha participação na equipe.",
+    "solution": ["A completar: principais funcionalidades"],
+    "challenges": "A completar: um desafio e como ele foi resolvido.",
+    "result": "A completar: o que o projeto entrega.",
+    "tags": ["HTML5", "CSS3", "Google Fonts"],
+    "cover": "",
+    "gallery": [],
+    "links": { "demo": "", "repo": "" }
+  }
+]

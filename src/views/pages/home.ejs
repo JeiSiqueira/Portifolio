@@ -1,0 +1,62 @@
+<%- include('../partials/head', {
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: profile.name,
+    jobTitle: profile.role,
+    email: 'mailto:' + profile.email,
+    url: siteUrl,
+    sameAs: Object.values(profile.social).filter(Boolean),
+  },
+}) %>
+
+<section class="hero">
+  <div class="container hero__inner">
+    <p class="eyebrow"><%= profile.role %></p>
+    <h1 class="hero__title"><%= profile.name %></h1>
+    <p class="hero__lead"><%= profile.headline %></p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="/projetos">Ver projetos</a>
+      <a class="btn btn--ghost" href="/contato">Fale comigo</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="titulo-destaques">
+  <div class="container">
+    <div class="section__head">
+      <h2 id="titulo-destaques" class="section__title">Projetos em destaque</h2>
+      <a class="link-arrow" href="/projetos">Todos os projetos <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="grid">
+      <% featured.forEach((project) => { %>
+        <%- include('../partials/project-card', { project }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" aria-labelledby="titulo-diferencial">
+  <div class="container">
+    <h2 id="titulo-diferencial" class="section__title">Da área financeira para a tecnologia</h2>
+    <p class="section__lead">Sete anos resolvendo problemas reais de negócio, agora aplicados ao desenvolvimento de software.</p>
+    <ul class="strengths">
+      <% profile.strengths.forEach((item) => { %>
+        <li class="strength reveal">
+          <h3 class="strength__title"><%= item.title %></h3>
+          <p><%= item.text %></p>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+
+<section class="section cta" aria-labelledby="titulo-cta">
+  <div class="container cta__inner">
+    <h2 id="titulo-cta" class="section__title">Vamos conversar?</h2>
+    <p class="section__lead">Estou em busca da minha primeira oportunidade como desenvolvedora. Se o meu perfil combina com a sua equipe, me chame.</p>
+    <a class="btn btn--primary" href="/contato">Entrar em contato</a>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

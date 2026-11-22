@@ -1,0 +1,39 @@
+{
+  "name": "portfolio-jeimili-mendes",
+  "version": "1.0.0",
+  "description": "Portfólio de Jeimili Mendes, desenvolvedora Full Stack. Node.js + Express + EJS.",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "node --test \"tests/**/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "portfolio",
+    "express",
+    "ejs"
+  ],
+  "author": "Jeimili Mendes",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "compression": "^1.8.2",
+    "dotenv": "^18.0.9",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "morgan": "^1.12.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "supertest": "^7.3.2"
+  }
+}

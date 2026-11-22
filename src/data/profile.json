@@ -1,0 +1,56 @@
+{
+  "name": "Jeimili Mendes",
+  "role": "Desenvolvedora Full Stack",
+  "location": "Brasil",
+  "email": "jeisiqueira7@gmail.com",
+  "headline": "Desenvolvedora Full Stack em transição de carreira, unindo 7 anos de experiência na área financeira à tecnologia para criar soluções que resolvem problemas reais.",
+  "photo": "/img/foto-jeimili.webp",
+  "photoFallback": "/img/foto-jeimili.jpg",
+  "cv": "",
+  "ogImage": "",
+  "summary": [
+    "Sou Jeimili Mendes, desenvolvedora Full Stack, e trago para a tecnologia algo que vai além do código: a experiência de quem passou 7 anos resolvendo problemas reais na área financeira.",
+    "Sou graduada em Administração, pós-graduada em Gestão Financeira e estou concluindo o curso de Análise e Desenvolvimento de Sistemas. Escolhi a transição de carreira com planejamento e dedicação, e levo para o desenvolvimento de software as mesmas qualidades que me acompanharam até aqui: organização, responsabilidade com prazos, atenção aos detalhes e uma visão de negócio que me faz entender o problema antes de propor a solução.",
+    "Meus projetos mostram essa forma de trabalhar. Desenvolvi um sistema de controle financeiro, que une minha experiência profissional à programação; um sistema de agendamento para salão de beleza, pensado para facilitar a rotina de quem atende clientes; e, no meio acadêmico, o projeto Voz e Proteção, voltado aos direitos humanos.",
+    "Gosto de atuar em todas as etapas do desenvolvimento: criar interfaces claras, resolver problemas com lógica e garantir que as aplicações sejam rápidas e eficientes. Encaro cada desafio como uma oportunidade de aprender e entregar um resultado melhor.",
+    "Estou pronta para minha primeira oportunidade na área de tecnologia e para contribuir com dedicação, maturidade profissional e vontade de crescer junto com a equipe."
+  ],
+  "strengths": [
+    {
+      "title": "Visão de negócio",
+      "text": "Sete anos na área financeira me ensinaram a entender o problema e o impacto dele antes de propor a solução."
+    },
+    {
+      "title": "Organização",
+      "text": "Responsabilidade com prazos, atenção aos detalhes e processos claros do início ao fim."
+    },
+    {
+      "title": "Resolução de problemas",
+      "text": "Gosto de quebrar desafios em partes menores e resolvê-los com lógica, passo a passo."
+    }
+  ],
+  "skills": [
+    { "group": "Front-end", "items": ["React", "TypeScript", "JavaScript", "HTML5", "CSS3", "EJS"] },
+    { "group": "Back-end", "items": ["C#", ".NET", "ASP.NET Core", "APIs REST", "Node.js", "Express"] },
+    { "group": "Banco de dados", "items": ["MySQL", "Entity Framework Core"] },
+    { "group": "Segurança", "items": ["JWT", "BCrypt"] },
+    { "group": "Ferramentas", "items": ["Git", "GitHub", "Vite", "ClosedXML", "VS Code", "npm"] }
+  ],
+  "experience": [
+    {
+      "period": "7 anos",
+      "role": "Profissional da área financeira",
+      "company": "",
+      "description": "Rotinas financeiras, análise de dados e resolução de problemas do dia a dia de negócio."
+    }
+  ],
+  "education": [
+    { "period": "02/2025 – 12/2026", "title": "Análise e Desenvolvimento de Sistemas", "institution": "" },
+    { "period": "", "title": "Pós-graduação em Gestão Financeira", "institution": "" },
+    { "period": "", "title": "Graduação em Administração", "institution": "" }
+  ],
+  "social": {
+    "github": "https://github.com/JeiSiqueira",
+    "linkedin": "https://www.linkedin.com/in/jeimili-siqueira/"
+  }
+}

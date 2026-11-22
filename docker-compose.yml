@@ -1,0 +1,46 @@
+# Ambiente LOCAL de desenvolvimento.
+#   docker compose up --build --watch   -> http://localhost:3000 (com hot reload)
+#   docker compose run --rm test        -> roda lint + testes
+
+name: portfolio-dev
+
+services:
+  web:
+    build:
+      context: .
+      target: dev
+    image: portfolio:dev
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
+    # Hot reload: `docker compose up --watch` copia as alterações para o container
+    # (funciona no Windows/macOS, onde bind mounts não repassam eventos de arquivo).
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./public
+          target: /app/public
+        - action: sync
+          path: ./tests
+          target: /app/tests
+        - action: rebuild
+          path: package-lock.json
+
+  test:
+    build:
+      context: .
+      target: deps
+    image: portfolio:deps
+    profiles: ['test']
+    environment:
+      NODE_ENV: test
+    volumes:
+      - ./:/app
+      - /app/node_modules # mantém o node_modules da imagem (Linux), não o do Windows
+    command: sh -c "npm run lint && npm test"

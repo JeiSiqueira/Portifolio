@@ -1,0 +1,82 @@
+<%- include('../partials/head') %>
+
+<section class="section">
+  <div class="container about">
+    <div class="about__photo">
+      <% if (profile.photo) { %>
+        <%# <picture>: o navegador usa o .webp (mais leve) e, se não suportar, o .jpg. %>
+        <picture>
+          <source srcset="<%= profile.photo %>" type="image/webp">
+          <img src="<%= profile.photoFallback || profile.photo %>" alt="Foto de <%= profile.name %>, sorrindo" width="560" height="744" fetchpriority="high">
+        </picture>
+      <% } else { %>
+        <span class="about__placeholder" aria-hidden="true"><%= profile.name.split(' ').map(w => w[0]).join('') %></span>
+      <% } %>
+    </div>
+    <div class="about__intro">
+      <p class="eyebrow"><%= profile.role %> · <%= profile.location %></p>
+      <h1 class="page-title">Sobre mim</h1>
+      <div class="prose">
+        <% profile.summary.forEach((paragraph) => { %>
+          <p><%= paragraph %></p>
+        <% }) %>
+      </div>
+      <% if (profile.cv) { %>
+        <a class="btn btn--primary" href="<%= profile.cv %>" download>Baixar currículo (PDF)</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" aria-labelledby="titulo-competencias">
+  <div class="container">
+    <h2 id="titulo-competencias" class="section__title">Competências</h2>
+    <div class="skills">
+      <% profile.skills.forEach((group) => { %>
+        <div class="skills__group reveal">
+          <h3 class="skills__title"><%= group.group %></h3>
+          <ul class="tags">
+            <% group.items.forEach((item) => { %>
+              <li class="tag"><%= item %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="titulo-trajetoria">
+  <div class="container">
+    <h2 id="titulo-trajetoria" class="section__title">Trajetória</h2>
+    <div class="timeline-wrap">
+      <div>
+        <h3 class="timeline__heading">Formação</h3>
+        <ol class="timeline">
+          <% profile.education.forEach((item) => { %>
+            <li class="timeline__item reveal">
+              <% if (item.period) { %><p class="timeline__period"><%= item.period %></p><% } %>
+              <p class="timeline__title"><%= item.title %></p>
+              <% if (item.institution) { %><p class="timeline__sub"><%= item.institution %></p><% } %>
+            </li>
+          <% }) %>
+        </ol>
+      </div>
+      <div>
+        <h3 class="timeline__heading">Experiência</h3>
+        <ol class="timeline">
+          <% profile.experience.forEach((item) => { %>
+            <li class="timeline__item reveal">
+              <% if (item.period) { %><p class="timeline__period"><%= item.period %></p><% } %>
+              <p class="timeline__title"><%= item.role %></p>
+              <% if (item.company) { %><p class="timeline__sub"><%= item.company %></p><% } %>
+              <% if (item.description) { %><p><%= item.description %></p><% } %>
+            </li>
+          <% }) %>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

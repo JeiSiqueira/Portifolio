@@ -1,0 +1,30 @@
+<%- include('../partials/head') %>
+
+<%
+  const channels = [
+    { label: 'E-mail', value: profile.email, href: 'mailto:' + profile.email, external: false },
+    profile.social.linkedin && { label: 'LinkedIn', value: profile.social.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: profile.social.linkedin, external: true },
+    profile.social.github && { label: 'GitHub', value: profile.social.github.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: profile.social.github, external: true },
+  ].filter(Boolean);
+%>
+
+<section class="section">
+  <div class="container">
+    <h1 class="page-title">Contato</h1>
+    <p class="section__lead">Quer conversar sobre uma vaga ou um projeto? Fale comigo por um dos canais abaixo.</p>
+
+    <ul class="channels">
+      <% channels.forEach((c) => { %>
+        <li>
+          <a class="channel" href="<%= c.href %>"<% if (c.external) { %> target="_blank" rel="noopener noreferrer"<% } %>>
+            <span class="channel__label"><%= c.label %></span>
+            <span class="channel__value"><%= c.value %></span>
+            <% if (c.external) { %><span class="sr-only">(abre em nova aba)</span><span class="channel__icon" aria-hidden="true">↗</span><% } %>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

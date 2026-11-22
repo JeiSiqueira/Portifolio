@@ -1,0 +1,64 @@
+# Ambiente de PRODUÇÃO (servidor/VPS).
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# - web:   app Node em modo produção (imagem enxuta, usuário não-root, filesystem somente leitura)
+# - caddy: proxy reverso com HTTPS automático (Let's Encrypt) na frente do app
+# Veja DEPLOY.md para o passo a passo completo.
+name: portfolio
+
+services:
+  web:
+    build:
+      context: .
+      target: prod
+    image: ${IMAGE:-portfolio:prod}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SITE_URL: ${SITE_URL:?Defina SITE_URL no .env.production}
+    expose:
+      - '3000' # só acessível pela rede interna; quem fica exposto é o Caddy
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.50'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp' # HTTP/3
+    environment:
+      DOMAIN: ${DOMAIN:?Defina DOMAIN no .env.production}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # certificados TLS (não apagar!)
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  caddy_data:
+  caddy_config:

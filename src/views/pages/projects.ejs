@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+
+<section class="section">
+  <div class="container">
+    <h1 class="page-title">Projetos</h1>
+    <p class="section__lead">Cada projeto mostra o problema que eu quis resolver, a solução que construí e o que aprendi no caminho.</p>
+
+    <nav class="filters" aria-label="Filtrar por tecnologia">
+      <ul class="filters__list">
+        <li><a class="chip" href="/projetos"<% if (!activeTag) { %> aria-current="true"<% } %>>Todos</a></li>
+        <% tags.forEach((tag) => { %>
+          <li><a class="chip" href="/projetos?tag=<%= encodeURIComponent(tag) %>"<% if (tag === activeTag) { %> aria-current="true"<% } %>><%= tag %></a></li>
+        <% }) %>
+      </ul>
+    </nav>
+
+    <% if (projects.length) { %>
+      <h2 class="sr-only"><%= activeTag ? 'Projetos com ' + activeTag : 'Todos os projetos' %></h2>
+      <div class="grid">
+        <% projects.forEach((project) => { %>
+          <%- include('../partials/project-card', { project }) %>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty">
+        <p>Nenhum projeto com essa tecnologia.</p>
+        <a class="btn btn--ghost" href="/projetos">Ver todos os projetos</a>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

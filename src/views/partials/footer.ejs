@@ -1,0 +1,18 @@
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>&copy; <%= year %> <%= profile.name %></p>
+      <ul class="site-footer__links">
+        <li><a href="mailto:<%= profile.email %>">E-mail</a></li>
+        <% if (profile.social.linkedin) { %>
+          <li><a href="<%= profile.social.linkedin %>" target="_blank" rel="noopener noreferrer">LinkedIn <span class="sr-only">(abre em nova aba)</span></a></li>
+        <% } %>
+        <% if (profile.social.github) { %>
+          <li><a href="<%= profile.social.github %>" target="_blank" rel="noopener noreferrer">GitHub <span class="sr-only">(abre em nova aba)</span></a></li>
+        <% } %>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

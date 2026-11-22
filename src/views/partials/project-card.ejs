@@ -1,0 +1,23 @@
+<%# Recebe: project, headingLevel (opcional, padrão 3) %>
+<% const h = typeof headingLevel !== 'undefined' ? headingLevel : 3; %>
+<article class="card reveal">
+  <div class="card__media">
+    <% if (project.cover) { %>
+      <img src="<%= project.cover %>" alt="" width="640" height="400" loading="lazy" decoding="async">
+    <% } else { %>
+      <span class="card__placeholder" aria-hidden="true"><%= project.title.split(' ').filter(w => w.length > 2).slice(0, 2).map(w => w[0]).join('') %></span>
+    <% } %>
+  </div>
+  <div class="card__body">
+    <p class="card__meta"><%= project.type %> · <%= project.year %></p>
+    <h<%= h %> class="card__title">
+      <a class="card__link" href="/projetos/<%= project.slug %>"><%= project.title %></a>
+    </h<%= h %>>
+    <p class="card__summary"><%= project.summary %></p>
+    <ul class="tags" aria-label="Tecnologias">
+      <% project.tags.forEach((tag) => { %>
+        <li class="tag"><%= tag %></li>
+      <% }) %>
+    </ul>
+  </div>
+</article>

@@ -1,0 +1,78 @@
+<%- include('../partials/head') %>
+
+<article class="section case">
+  <div class="container case__inner">
+    <a class="link-back" href="/projetos"><span aria-hidden="true">←</span> Voltar para projetos</a>
+
+    <header class="case__header">
+      <p class="eyebrow"><%= project.type %> · <%= project.year %></p>
+      <h1 class="page-title"><%= project.title %></h1>
+      <p class="section__lead"><%= project.summary %></p>
+      <ul class="tags" aria-label="Tecnologias">
+        <% project.tags.forEach((tag) => { %>
+          <li><a class="tag tag--link" href="/projetos?tag=<%= encodeURIComponent(tag) %>"><%= tag %></a></li>
+        <% }) %>
+      </ul>
+      <% if (project.links.demo || project.links.repo) { %>
+        <div class="hero__actions">
+          <% if (project.links.demo) { %>
+            <a class="btn btn--primary" href="<%= project.links.demo %>" target="_blank" rel="noopener noreferrer">Ver online <span class="sr-only">(abre em nova aba)</span><span aria-hidden="true">↗</span></a>
+          <% } %>
+          <% if (project.links.repo) { %>
+            <a class="btn btn--ghost" href="<%= project.links.repo %>" target="_blank" rel="noopener noreferrer">Código no GitHub <span class="sr-only">(abre em nova aba)</span><span aria-hidden="true">↗</span></a>
+          <% } %>
+        </div>
+      <% } %>
+    </header>
+
+    <% if (project.cover) { %>
+      <img class="case__cover" src="<%= project.cover %>" alt="Tela do projeto <%= project.title %>" width="1080" height="675">
+    <% } %>
+
+    <div class="prose case__body">
+      <h2>Contexto e problema</h2>
+      <p><%= project.problem %></p>
+
+      <h2>Meu papel</h2>
+      <p><%= project.role %></p>
+
+      <h2>Solução</h2>
+      <ul>
+        <% project.solution.forEach((item) => { %>
+          <li><%= item %></li>
+        <% }) %>
+      </ul>
+
+      <h2>Desafios e aprendizados</h2>
+      <p><%= project.challenges %></p>
+
+      <h2>Resultado</h2>
+      <p><%= project.result %></p>
+    </div>
+
+    <% if (project.gallery.length) { %>
+      <section aria-labelledby="titulo-galeria">
+        <h2 id="titulo-galeria" class="section__title">Capturas de tela</h2>
+        <div class="gallery">
+          <% project.gallery.forEach((img) => { %>
+            <figure>
+              <img src="<%= img.src %>" alt="<%= img.alt %>" width="640" height="400" loading="lazy" decoding="async">
+              <% if (img.caption) { %><figcaption><%= img.caption %></figcaption><% } %>
+            </figure>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+
+    <nav class="pager" aria-label="Outros projetos">
+      <% if (prev) { %>
+        <a class="pager__link" href="/projetos/<%= prev.slug %>" rel="prev"><span class="pager__label">← Anterior</span><%= prev.title %></a>
+      <% } else { %><span></span><% } %>
+      <% if (next) { %>
+        <a class="pager__link pager__link--next" href="/projetos/<%= next.slug %>" rel="next"><span class="pager__label">Próximo →</span><%= next.title %></a>
+      <% } %>
+    </nav>
+  </div>
+</article>
+
+<%- include('../partials/footer') %>

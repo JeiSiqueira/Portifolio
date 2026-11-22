@@ -1,0 +1,27 @@
+# Não enviar para o contexto de build do Docker
+node_modules
+npm-debug.log*
+*.log
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+coverage
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+.claude
+
+# Arquivos de Docker/documentação não são necessários dentro da imagem
+Dockerfile
+docker-compose*.yml
+.dockerignore
+deploy
+docs
+DEPLOY.md
+README.md
+
+# Imagens originais (as usadas pelo site ficam em public/img)
+img
