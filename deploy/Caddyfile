@@ -15,3 +15,15 @@
 www.{$DOMAIN} {
 	redir https://{$DOMAIN}{uri} permanent
 }
+
+# Sistema de Agendamento (outro projeto Docker, em ~/agendamento).
+# Os containers entram na rede externa "edge" com estes aliases.
+api-agendamento.{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy agendamento-api:8080
+}
+
+agendamento.{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy agendamento-web:8080
+}

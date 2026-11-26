@@ -53,11 +53,20 @@ services:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data # certificados TLS (não apagar!)
       - caddy_config:/config
+    networks:
+      - default
+      - edge # alcança os containers do Sistema de Agendamento
     logging:
       driver: json-file
       options:
         max-size: '10m'
         max-file: '3'
+
+networks:
+  # Rede compartilhada com o Sistema de Agendamento (criada pelo deploy, se não existir)
+  edge:
+    external: true
+    name: edge
 
 volumes:
   caddy_data:

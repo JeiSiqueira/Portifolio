@@ -147,7 +147,12 @@ jobs:
 
             DC="docker compose -f docker-compose.prod.yml --env-file .env.production"
             $DC pull web
+            # Rede compartilhada com o Sistema de Agendamento
+            docker network inspect edge > /dev/null 2>&1 || docker network create edge
             $DC up -d --no-build --remove-orphans
+            # Aplica mudanças no Caddyfile sem derrubar o site
+            sleep 3
+            $DC exec -T caddy caddy reload --config /etc/caddy/Caddyfile || $DC restart caddy
 
             docker logout ghcr.io
 
